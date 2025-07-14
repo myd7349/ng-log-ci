@@ -23,6 +23,7 @@ jobs:
         run: |
           git clone https://github.com/ng-log/ng-log.git
           pushd ng-log
+          git apply ${{ github.workspace }}/fix-unittest.patch
           popd
 
       - name: Configure
