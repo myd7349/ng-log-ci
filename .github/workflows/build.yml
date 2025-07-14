@@ -1,0 +1,48 @@
+name: ng-log
+
+on:
+  push:
+  pull_request:
+    types: [ opened, ready_for_review, reopened, synchronize ]
+
+env:
+  BUILD_TYPE: Release
+  INSTALL_PREFIX: install
+
+jobs:
+  build:
+    name: build
+    if: >-
+      github.event.pull_request.draft == false
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Clone ng-log
+        run: |
+          git clone https://github.com/ng-log/ng-log.git
+          pushd ng-log
+          popd
+
+      - name: Configure
+        run: >
+          cmake
+          -S ng-log
+          -B build
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+          -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_PREFIX }}
+          -DBUILD_EXAMPLES=ON
+          -DBUILD_TESTING=ON
+          -DPRINT_UNSYMBOLIZED_STACK_TRACES=OFF
+          -DWITH_GFLAGS=OFF
+          -DWITH_GTEST=OFF
+          -DWITH_PKGCONFIG=ON
+          -DWITH_SYMBOLIZE=ON
+          -DWITH_TLS=ON
+
+      - name: Build & Install
+        run: |
+          pushd build
+          make
+          popd
